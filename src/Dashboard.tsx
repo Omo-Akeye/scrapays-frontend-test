@@ -132,10 +132,10 @@ export default function Dashboard({ user }: { user: any }) {
      
           <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
             {currentBooks.map((book: any) => (
-              <Flex key={book.id} direction="column" justify="space-between" bg="white" p={6} rounded="xl" borderWidth="1px" shadow="sm" _hover={{ shadow: 'md' }} h="280px">
+              <Flex key={book.id} direction="column" justify="space-between" bg="white" p={6} rounded="xl" borderWidth="1px" shadow="sm" _hover={{ shadow: 'md' }} h="230px">
                 <Box>
                   <Heading size="sm" mb={2} noOfLines={2}>{book.name}</Heading>
-                  <Text fontSize="sm" color="gray.500" noOfLines={4}>{book.description}</Text>
+                  <Text fontSize="sm" color="gray.500" noOfLines={5}>{book.description}</Text>
                 </Box>
                 
                 <HStack justify="flex-end" pt={4} spacing={2}>

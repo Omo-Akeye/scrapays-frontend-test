@@ -1,73 +1,105 @@
-# React + TypeScript + Vite
+# 📚 BookStore Management Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, secure, and responsive Single Page Application (SPA) for managing book inventories. Built with **React**, **TypeScript**, and **GraphQL**, this dashboard features robust authentication, real-time data updates, and a polished UI using **Chakra UI** and **Tailwind CSS**.
 
-Currently, two official plugins are available:
+![Project Status](https://img.shields.io/badge/status-active-success.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+* **🔐 Secure Authentication:** Full user login/logout flow powered by **Auth0** with persistent sessions.
+* **⚡ CRUD Operations:**
+    * **Create:** Add new books via a clean, validated modal interface.
+    * **Read:** View books in a responsive grid layout with Skeleton loading states.
+    * **Update:** Edit book details seamlessly with pre-filled forms.
+    * **Delete:** Remove items safely with a confirmation dialog.
+* **🔎 Advanced Search:** Real-time client-side filtering by book title or description.
+* **Fn Pagination:** Efficient data handling with numbered pagination controls.
+* **📱 Fully Responsive:** Optimized layout for both desktop and mobile devices.
+* **🎨 Modern UI:** Built with Chakra UI components and Tailwind CSS v4 styling.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Frontend Core
+* **[React 18](https://reactjs.org/)** - Component-based UI Library
+* **[TypeScript](https://www.typescriptlang.org/)** - Static Typing for reliability
+* **[Vite](https://vitejs.dev/)** - Ultra-fast build tool
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Styling & UI
+* **[Chakra UI](https://chakra-ui.com/)** - Accessible component library (Modals, Inputs, Alerts)
+* **[Tailwind CSS (v4)](https://tailwindcss.com/)** - Utility-first CSS for layout
+* **[React Icons](https://react-icons.github.io/react-icons/)** - Vector icons
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Data & State
+* **[Apollo Client](https://www.apollographql.com/docs/react/)** - GraphQL state management & caching
+* **[Auth0](https://auth0.com/)** - Identity & Authentication
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ⚙️ Prerequisites
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Before you begin, ensure you have the following installed:
+* **Node.js** (v18 or higher)
+* **npm** or **yarn**
+* **Backend API**: A running GraphQL backend.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+## 💻 Installation & Setup
+
+1.  **Clone the repository**
+    ```bash
+    git clone [https://github.com/Omo-Akeye/scrapays-frontend-test.git](https://github.com/Omo-Akeye/scrapays-frontend-test.git)
+    cd scrapays-frontend-test
+    ```
+
+2.  **Install dependencies**
+    ```bash
+    npm install
+    ```
+
+3.  **Configure Environment Variables**
+    This project uses a `.env` file for configuration.
+    
+    * Create a copy of the example file:
+      ```bash
+      cp .env.example .env
+      ```
+    * Open `.env` and fill in your specific Auth0 and API values:
+      ```env
+      VITE_AUTH0_DOMAIN=your_auth0_domain
+      VITE_AUTH0_CLIENT_ID=your_auth0_client_id
+      VITE_AUTH0_AUDIENCE=your_auth0_audience
+      VITE_API_URL=http://localhost:4109/books
+      ```
+
+4.  **Start the Development Server**
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:5173](http://localhost:5173) to view the app.
+
+---
+
+## 📂 Project Structure
+
+The project follows a scalable, feature-based architecture:
+
+```text
+src/
+├── 📂 components/       # Reusable UI components
+│   ├── BookFormModal.tsx   # Modal for Adding/Editing books
+│   ├── BookViewModal.tsx   # Modal for viewing details
+│   └── DeleteAlert.tsx     # Confirmation dialog
+├── 📂 graphql/          # GraphQL Queries & Mutations
+│   └── queries.tsx
+├── 📂 hooks/            # Custom React Hooks
+│   └── useBooks.ts         # Logic for API calls, search, & pagination
+├── 📂 types/            # TypeScript Interfaces
+│   └── types.ts
+├── App.tsx              # Main Auth & Provider setup
+├── Dashboard.tsx        # Main Dashboard View
+├── main.tsx             # Entry point
+└── index.css            # Global Styles (Tailwind)
