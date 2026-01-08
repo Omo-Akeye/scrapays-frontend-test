@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
-import { ChakraProvider, Button, Spinner, Center, Box, Text, Heading, VStack } from '@chakra-ui/react';
+import { ChakraProvider, Center, Spinner } from '@chakra-ui/react';
 import Dashboard from './Dashboard';
-import { FaBookOpen } from 'react-icons/fa';
 
-const createApolloClient = (token: string) => {
+
+const createApolloClient = (token: string | null) => {
   const httpLink = createHttpLink({
     uri: import.meta.env.VITE_API_URL,
   });
@@ -15,7 +15,7 @@ const createApolloClient = (token: string) => {
     return {
       headers: {
         ...headers,
-        authorization: token ? `Bearer ${token}` : '',
+        ...(token ? { authorization: `Bearer ${token}` } : {}),
         'apollo-require-preflight': 'true',
       },
     };
@@ -28,77 +28,42 @@ const createApolloClient = (token: string) => {
 };
 
 function App() {
-  const { loginWithRedirect, isAuthenticated, isLoading, getAccessTokenSilently, user } = useAuth0();
+  const { isAuthenticated, isLoading, getAccessTokenSilently, user } = useAuth0();
   const [client, setClient] = useState<any>(null);
-  const [tokenLoading, setTokenLoading] = useState(false);
 
   useEffect(() => {
     const initializeClient = async () => {
-      if (isAuthenticated && !client) {
-        setTokenLoading(true);
+      if (isLoading) return; 
+
+      if (isAuthenticated) {
+       
         try {
           const token = await getAccessTokenSilently();
           setClient(createApolloClient(token));
         } catch (error) {
           console.error('Error getting token:', error);
-        } finally {
-          setTokenLoading(false);
+  
+          setClient(createApolloClient(null));
         }
+      } else {
+   
+        setClient(createApolloClient(null));
       }
     };
     
     initializeClient();
-  }, [isAuthenticated, getAccessTokenSilently, client]);
+  }, [isAuthenticated, isLoading, getAccessTokenSilently]);
 
-
-  if (isLoading || (isAuthenticated && tokenLoading)) {
-    return (
-      <Center h="100vh">
-        <Spinner size="xl" color="teal.500" thickness="4px" />
-      </Center>
-    );
-  }
-
-
-  if (!isAuthenticated) {
+  if (isLoading || !client) {
     return (
       <ChakraProvider>
-        <Center h="100vh" bg="gray.50">
-          <Box bg="white" p={10} rounded="2xl" shadow="xl" textAlign="center" maxW="sm" w="full" borderWidth="1px">
-            <VStack spacing={6}>
-              <Box bg="teal.50" p={4} rounded="full">
-                <FaBookOpen size={40} color="#319795" /> 
-              </Box>
-              <Box>
-                <Heading size="lg" mb={2}>BookStore</Heading>
-                <Text color="gray.500">Manage your inventory with ease.</Text>
-              </Box>
-              
-             
-              <Button
-                colorScheme="teal"
-                size="lg"
-                width="full"
-                onClick={() => loginWithRedirect()}
-                shadow="md"
-                _hover={{ transform: 'translateY(-2px)', shadow: 'lg' }}
-              >
-                Log In to Dashboard
-              </Button>
-            </VStack>
-          </Box>
+        <Center h="100vh">
+          <Spinner size="xl" color="teal.500" thickness="4px" />
         </Center>
       </ChakraProvider>
     );
   }
 
-  if (!client) {
-    return (
-      <Center h="100vh">
-        <Spinner size="xl" color="teal.500" />
-      </Center>
-    );
-  }
 
   return (
     <ChakraProvider>

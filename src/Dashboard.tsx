@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { FaPlus, FaSearch, FaUserCircle, FaChevronLeft, FaChevronRight, FaBook, FaPen, FaTrash, FaEye } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaUserCircle, FaChevronLeft, FaChevronRight, FaBook, FaPen, FaTrash, FaEye, FaSignInAlt } from 'react-icons/fa';
 import { 
   useDisclosure, 
   Button, 
@@ -20,7 +20,8 @@ import {
   MenuItem,
   Container,
   HStack,
-  Skeleton 
+  Skeleton,
+  useToast 
 } from '@chakra-ui/react';
 import { useBooks } from './hooks/useBooks';
 import BookFormModal from './components/BookFormModal';
@@ -29,7 +30,8 @@ import DeleteAlert from './components/DeleteAlert';
 import type { Book } from './types';
 
 export default function Dashboard({ user }: { user: any }) {
-  const { logout } = useAuth0();
+  const { logout, loginWithRedirect, isAuthenticated } = useAuth0(); 
+  const toast = useToast();
   
   const { 
     loading, error, search, setSearch, currentPage, setCurrentPage, 
@@ -43,10 +45,28 @@ export default function Dashboard({ user }: { user: any }) {
 
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
 
-  const openAdd = () => { setSelectedBook(null); formModal.onOpen(); };
-  const openEdit = (book: any) => { setSelectedBook(book); formModal.onOpen(); };
+
+  const requireAuth = (action: () => void) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Access Restricted",
+        description: "You need admin access to perform this action. Please log in.",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+        position: "top"
+      });
+      return;
+    }
+    action();
+  };
+
+  const openAdd = () => requireAuth(() => { setSelectedBook(null); formModal.onOpen(); });
+  const openEdit = (book: any) => requireAuth(() => { setSelectedBook(book); formModal.onOpen(); });
+  const openDelete = (book: any) => requireAuth(() => { setSelectedBook(book); deleteAlert.onOpen(); });
+  
+
   const openView = (book: any) => { setSelectedBook(book); viewModal.onOpen(); };
-  const openDelete = (book: any) => { setSelectedBook(book); deleteAlert.onOpen(); };
 
   return (
     <Box minH="100vh" bg="gray.50">
@@ -58,13 +78,28 @@ export default function Dashboard({ user }: { user: any }) {
           </HStack>
           
           <HStack spacing={4}>
-            <Text fontSize="sm" fontWeight="medium" display={{ base: 'none', sm: 'block' }}>{user?.name}</Text>
-            <Menu>
-              <MenuButton as={IconButton} icon={user?.picture ? <Avatar size="sm" src={user.picture} /> : <FaUserCircle size={28} />} variant="ghost" rounded="full" />
-              <MenuList>
-                <MenuItem onClick={() => logout()} color="red.500">Logout</MenuItem>
-              </MenuList>
-            </Menu>
+            {isAuthenticated ? (
+           
+              <>
+                <Text fontSize="sm" fontWeight="medium" display={{ base: 'none', sm: 'block' }}>{user?.name}</Text>
+                <Menu>
+                  <MenuButton as={IconButton} icon={user?.picture ? <Avatar size="sm" src={user.picture} /> : <FaUserCircle size={28} />} variant="ghost" rounded="full" />
+                  <MenuList>
+                    <MenuItem onClick={() => logout()} color="red.500">Logout</MenuItem>
+                  </MenuList>
+                </Menu>
+              </>
+            ) : (
+        
+              <Button 
+                leftIcon={<FaSignInAlt />} 
+                colorScheme="teal" 
+                variant="outline"
+                onClick={() => loginWithRedirect()}
+              >
+                Log In
+              </Button>
+            )}
           </HStack>
         </Flex>
       </Box>
@@ -90,7 +125,7 @@ export default function Dashboard({ user }: { user: any }) {
               leftIcon={<FaPlus size={14} />} 
               colorScheme="teal" 
               px={8}
-              onClick={openAdd}
+              onClick={openAdd} 
               shadow="sm"
             >
               Add Book
@@ -144,7 +179,9 @@ export default function Dashboard({ user }: { user: any }) {
                 </Box>
                 
                 <HStack justify="flex-end" pt={4} spacing={2}>
+              
                   <IconButton aria-label="View" icon={<FaEye />} size="sm" variant="ghost" colorScheme="teal" onClick={() => openView(book)} />
+               
                   <IconButton aria-label="Edit" icon={<FaPen />} size="sm" variant="ghost" colorScheme="blue" onClick={() => openEdit(book)} />
                   <IconButton aria-label="Delete" icon={<FaTrash />} size="sm" variant="ghost" colorScheme="red" onClick={() => openDelete(book)} />
                 </HStack>
@@ -153,6 +190,7 @@ export default function Dashboard({ user }: { user: any }) {
           </SimpleGrid>
         )}
 
+  
         {!loading && !error && totalPages > 1 && (
           <Flex justify="center" align="center" mt={12} gap={2}>
             <Button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} isDisabled={currentPage === 1} size="sm" variant="outline"><FaChevronLeft /></Button>
