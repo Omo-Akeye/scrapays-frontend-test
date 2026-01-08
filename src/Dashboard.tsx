@@ -31,7 +31,6 @@ import type { Book } from './types';
 export default function Dashboard({ user }: { user: any }) {
   const { logout } = useAuth0();
   
-
   const { 
     loading, error, search, setSearch, currentPage, setCurrentPage, 
     totalPages, currentBooks, handleCreate, handleUpdate, handleDelete,
@@ -42,19 +41,15 @@ export default function Dashboard({ user }: { user: any }) {
   const viewModal = useDisclosure();   
   const deleteAlert = useDisclosure(); 
 
- const [selectedBook, setSelectedBook] = useState<Book | null>(null)
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null)
 
   const openAdd = () => { setSelectedBook(null); formModal.onOpen(); };
   const openEdit = (book: any) => { setSelectedBook(book); formModal.onOpen(); };
   const openView = (book: any) => { setSelectedBook(book); viewModal.onOpen(); };
   const openDelete = (book: any) => { setSelectedBook(book); deleteAlert.onOpen(); };
 
-  if (error) return <Box p={10} textAlign="center" color="red.500">Error: {error.message}</Box>;
-
   return (
     <Box minH="100vh" bg="gray.50">
-      
-    
       <Box as="nav" bg="white" borderBottomWidth="1px" px={8} py={4} position="sticky" top={0} zIndex={10}>
         <Flex justify="space-between" align="center" maxW="7xl" mx="auto">
           <HStack spacing={2}>
@@ -75,8 +70,6 @@ export default function Dashboard({ user }: { user: any }) {
       </Box>
 
       <Container maxW="7xl" py={8}>
-        
-   
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ md: 'center' }} mb={8} gap={4}>
           <Heading size="lg" color="gray.800">Inventory</Heading>
           
@@ -96,7 +89,7 @@ export default function Dashboard({ user }: { user: any }) {
             <Button 
               leftIcon={<FaPlus size={14} />} 
               colorScheme="teal" 
-                 px={8}
+              px={8}
               onClick={openAdd}
               shadow="sm"
             >
@@ -105,9 +98,23 @@ export default function Dashboard({ user }: { user: any }) {
           </HStack>
         </Flex>
 
-      
-        {loading ? (
-        
+        {error ? (
+          <Box 
+            p={8} 
+            textAlign="center" 
+            bg="red.50" 
+            borderWidth="1px" 
+            borderColor="red.200" 
+            rounded="xl" 
+            color="red.600"
+          >
+            <Heading size="md" mb={2}>Unable to load books</Heading>
+            <Text>{error.message}</Text>
+            <Button mt={4} size="sm" colorScheme="red" variant="outline" onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </Box>
+        ) : loading ? (
           <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
              {[...Array(8)].map((_, i) => (
                <Box key={i} p={6} bg="white" rounded="xl" borderWidth="1px" h="280px">
@@ -124,12 +131,10 @@ export default function Dashboard({ user }: { user: any }) {
              ))}
           </SimpleGrid>
         ) : currentBooks.length === 0 ? (
-      
           <Box textAlign="center" py={20} bg="white" rounded="xl" borderWidth="1px" borderStyle="dashed">
             <Text color="gray.500" fontSize="lg">No books found.</Text>
           </Box>
         ) : (
-     
           <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
             {currentBooks.map((book: any) => (
               <Flex key={book.id} direction="column" justify="space-between" bg="white" p={6} rounded="xl" borderWidth="1px" shadow="sm" _hover={{ shadow: 'md' }} h="230px">
@@ -148,7 +153,7 @@ export default function Dashboard({ user }: { user: any }) {
           </SimpleGrid>
         )}
 
-        {!loading && totalPages > 1 && (
+        {!loading && !error && totalPages > 1 && (
           <Flex justify="center" align="center" mt={12} gap={2}>
             <Button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} isDisabled={currentPage === 1} size="sm" variant="outline"><FaChevronLeft /></Button>
             <Text fontSize="sm" color="gray.600" px={2}>Page {currentPage} of {totalPages}</Text>
@@ -156,7 +161,6 @@ export default function Dashboard({ user }: { user: any }) {
           </Flex>
         )}
 
-       
         <BookFormModal 
           isOpen={formModal.isOpen} 
           onClose={formModal.onClose} 

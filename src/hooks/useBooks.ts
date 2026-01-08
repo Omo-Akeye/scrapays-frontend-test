@@ -2,22 +2,24 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useToast } from '@chakra-ui/react';
 import { GET_BOOKS, CREATE_BOOK, UPDATE_BOOK, DELETE_BOOK } from '../graphql/queries';
-import type { Book } from '../types';
+import type { Book } from '../types'; 
 
 export const useBooks = () => {
   const toast = useToast();
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10; 
 
 
-  const { loading, error, data, refetch } = useQuery(GET_BOOKS);
+  const offset = (currentPage - 1) * itemsPerPage;
 
+  const { loading, error, data, refetch } = useQuery(GET_BOOKS, {
+    variables: { limit: itemsPerPage, offset },
+  });
 
   const [createBook, { loading: creating }] = useMutation(CREATE_BOOK);
   const [updateBook, { loading: updating }] = useMutation(UPDATE_BOOK);
   const [deleteBook, { loading: deleting }] = useMutation(DELETE_BOOK);
-
 
   const handleCreate = async (name: string, description: string) => {
     try {
@@ -48,6 +50,10 @@ export const useBooks = () => {
       await deleteBook({ variables: { id } });
       toast({ title: 'Book deleted', status: 'info', duration: 3000, isClosable: true });
       refetch();
+
+      if (currentBooks.length === 1 && currentPage > 1) {
+        setCurrentPage(p => p - 1);
+      }
       return true;
     } catch (err: any) {
       toast({ title: 'Error deleting book', description: err.message, status: 'error', duration: 4000 });
@@ -55,17 +61,12 @@ export const useBooks = () => {
     }
   };
 
-const allBooks: Book[] = data?.books || [];
-  const filteredBooks = allBooks.filter((book: any) => 
-    book.name.toLowerCase().includes(search.toLowerCase()) || 
-    book.description.toLowerCase().includes(search.toLowerCase())
-  );
 
-  const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
-  const currentBooks = filteredBooks.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const currentBooks: Book[] = data?.books?.items || [];
+  const totalBooks = data?.books?.total || 0;
+  
+
+  const totalPages = Math.ceil(totalBooks / itemsPerPage);
 
   return {
     loading,
